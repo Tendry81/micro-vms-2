@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+requests
+gitpython
+pathspec
+python-multipart
+websockets
+aiofiles
+PyYAML
