@@ -9,7 +9,17 @@ RUN apt-get update && \
 
 # Ensure full permissions on ptmx
 RUN chmod 666 /dev/pts/ptmx
-RUN npm install -g localtunnel
+RUN curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+    | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+    && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
+    | sudo tee /etc/apt/sources.list.d/ngrok.list \
+    && sudo apt update \
+    && sudo apt install ngrok
+
+RUN ngrok config add-authtoken 37WgAJiDpNabBecxP6IGylPCvSv_6b32MUF9sRkYUQaXFV9mQ
+
+RUN ngrok http 80
+
 RUN useradd -m -u 1000 user
 RUN mkdir -p /micro-vms-projects && chown -R user:user /micro-vms-projects
 
