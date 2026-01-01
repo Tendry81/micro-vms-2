@@ -9,21 +9,23 @@ RUN apt-get update && \
 
 # Ensure full permissions on ptmx
 RUN chmod 666 /dev/pts/ptmx
+
+# Install ngrok
 RUN curl -sSL https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-    | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+    | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
     && echo "deb https://ngrok-agent.s3.amazonaws.com bookworm main" \
-    | sudo tee /etc/apt/sources.list.d/ngrok.list \
-    && sudo apt update \
-    && sudo apt install ngrok
-
-RUN ngrok config add-authtoken 37WgAJiDpNabBecxP6IGylPCvSv_6b32MUF9sRkYUQaXFV9mQ
-
-RUN ngrok http 80
+    | tee /etc/apt/sources.list.d/ngrok.list \
+    && apt-get update \
+    && apt-get install -y ngrok \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -u 1000 user
 RUN mkdir -p /micro-vms-projects && chown -R user:user /micro-vms-projects
 
+# Configure ngrok authtoken as user
 USER user
+RUN ngrok config add-authtoken 37WgAJiDpNabBecxP6IGylPCvSv_6b32MUF9sRkYUQaXFV9mQ
+
 ENV PATH="/home/user/.local/bin:$PATH"
 
 WORKDIR /app
@@ -34,4 +36,10 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY --chown=user . /app
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "4"]
+# Create startup script
+RUN echo '#!/bin/bash\n\
+ngrok http 80 --log=stdout &\n\
+exec uvicorn app:app --host 0.0.0.0 --port 7860 --workers 4' > /app/start.sh && \
+    chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
