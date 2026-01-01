@@ -382,7 +382,7 @@ class GitOperations:
                     stat = file_path.stat()
                     file_info.update({
                         "size_bytes": stat.st_size if file_path.is_file() else None,
-                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                        "modified": datetime.date.fromtimestamp(stat.st_mtime).isoformat(),
                         "type": "directory" if file_path.is_dir() else "file"
                     })
                     
