@@ -363,12 +363,6 @@ class FilesystemOperations:
         """
         safe_path = self.resolver.resolve(path)
         
-        if safe_path.exists():
-            raise HTTPException(
-                status_code=409,
-                detail=f"File already exists: {path}"
-            )
-        
         # Create parent directories
         safe_path.parent.mkdir(parents=True, exist_ok=True)
         
