@@ -220,7 +220,7 @@ async def upload_file(
     fs_ops = FilesystemOperations(project_path)
     try:
         files = await http_request.form()
-        upload_file = files.get("file")
+        upload_file = files.get("files")
         response = fs_ops.upload_file(path=path, file=upload_file)
         logger.info(f"Uploaded file: {project_name}/{path}")
         return response.dict()

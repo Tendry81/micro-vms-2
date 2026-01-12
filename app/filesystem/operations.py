@@ -9,7 +9,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
 
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 
 from app.core.models import (
     FileEntry, DirectoryListResponse, FileReadResponse, 
@@ -349,7 +349,7 @@ class FilesystemOperations:
     def upload_file(
         self,
         path: str,
-        file: UploadFile
+        file
     ) -> FileUploadResponse:
         """
         Upload a file.
@@ -361,7 +361,13 @@ class FilesystemOperations:
         Returns:
             File upload response
         """
-        safe_path = self.resolver.resolve(path) / file.filename
+        safe_path = self.resolver.resolve(path)
+        
+        if safe_path.exists():
+            raise HTTPException(
+                status_code=409,
+                detail=f"File already exists: {path}"
+            )
         
         # Create parent directories
         safe_path.parent.mkdir(parents=True, exist_ok=True)
