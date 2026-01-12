@@ -33,10 +33,11 @@ class ErrorResponse(BaseModel):
 
 
 class FileUploadResponse(BaseModel):
-    """Response after uploading a file."""
     path: str
     uploaded: bool
     size_bytes: int
+    filename: Optional[str] = None
+    error: Optional[str] = None
 
 
 # ============================================================================
